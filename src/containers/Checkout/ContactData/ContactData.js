@@ -9,6 +9,8 @@ import Input from '../../../components/UI/Input/Input';
 import classes from './ContactData.css';
 import withErrorHandler from '../../../hoc/withErrorHandler/withErrorHandler';
 import { purchaseBurguer } from '../../../store/actions/index';
+import { updateObject } from '../../../utils/updateObject';
+import { checkValidity } from '../../../utils/checkValidity';
 
 class ContactData extends Component {
     state = {
@@ -114,55 +116,23 @@ class ContactData extends Component {
         const order = {
             ingredients: this.props.ingredients,
             price: this.props.totalPrice,
-            orderData: formData
+            orderData: formData,
+            userId: this.props.userId
         }
 
         this.props.onOrderBurger(order, this.props.token);
     }
 
-    checkValidity(value, rules) {
-        let isValid = true;
-
-        if (!rules) {
-            return true;
-        }
-
-        if (rules.required && isValid) {
-            isValid = value.trim() !== '';
-        }
-
-        if (rules.minLength && isValid) {
-            isValid = value.length >= rules.minLength;
-        }
-
-        if (rules.maxLength && isValid) {
-            isValid = value.length <= rules.maxLength;
-        }
-
-        if (rules.isEmail) {
-            const pattern = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
-            isValid = pattern.test(value) && isValid
-        }
-
-        if (rules.isNumeric) {
-            const pattern = /^\d+$/;
-            isValid = pattern.test(value) && isValid
-        }
-
-        return isValid;
-    }
-
     inputChangedHandler = (event, inputIdentifier) => {
-        const updatedOrderForm = {
-            ...this.state.orderForm
-        };
-        const updatedFormElement = {
-            ...updatedOrderForm[inputIdentifier]
-        };
-        updatedFormElement.value = event.target.value;
-        updatedFormElement.valid = this.checkValidity(updatedFormElement.value, updatedFormElement.validation);
-        updatedFormElement.touched = true;
-        updatedOrderForm[inputIdentifier] = updatedFormElement;
+        const updatedFormElement = updateObject(this.state.orderForm[inputIdentifier], {
+            value: event.target.value,
+            valid: checkValidity(event.target.value, this.state.orderForm[inputIdentifier].validation),
+            touched: true
+        });
+
+        const updatedOrderForm = updateObject(this.state.orderForm, {
+            [inputIdentifier]: updatedFormElement
+        });
 
         let formIsValid = true;
         for (let inputIdentifier in updatedOrderForm) {
@@ -221,8 +191,9 @@ const mapStateToProps = state => {
     return {
         ingredients: state.burgerBuilder.ingredients,
         totalPrice: state.burgerBuilder.totalPrice,
-        loading: state.order.loading ,
-        token: state.auth.token
+        loading: state.order.loading,
+        token: state.auth.token,
+        userId: state.auth.userId
     };
 }
 

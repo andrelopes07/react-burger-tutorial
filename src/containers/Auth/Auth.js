@@ -7,6 +7,8 @@ import Button from '../../components/UI/Button/Button';
 import Spinner from '../../components/UI/Spinner/Spinner';
 
 import { auth, setAuthRedirectPath } from '../../store/actions/';
+import { updateObject } from '../../utils/updateObject';
+import { checkValidity } from '../../utils/checkValidity';
 import classes from './Auth.css';
 
 class Auth extends Component {
@@ -43,7 +45,7 @@ class Auth extends Component {
                 touched: false
             }
         },
-        isSignUp: true
+        isSignUp: false
     }
 
     componentDidMount () {
@@ -52,48 +54,14 @@ class Auth extends Component {
         }
     }
 
-    checkValidity(value, rules) {
-        let isValid = true;
-
-        if (!rules) {
-            return true;
-        }
-
-        if (rules.required && isValid) {
-            isValid = value.trim() !== '';
-        }
-
-        if (rules.minLength && isValid) {
-            isValid = value.length >= rules.minLength;
-        }
-
-        if (rules.maxLength && isValid) {
-            isValid = value.length <= rules.maxLength;
-        }
-
-        if (rules.isEmail) {
-            const pattern = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
-            isValid = pattern.test(value) && isValid
-        }
-
-        if (rules.isNumeric) {
-            const pattern = /^\d+$/;
-            isValid = pattern.test(value) && isValid
-        }
-
-        return isValid;
-    }
-
     inputChangedHandler = (event, controlName) => {
-        const updatedControls = {
-            ...this.state.controls,
-            [controlName]: {
-                ...this.state.controls[controlName],
+        const updatedControls = updateObject(this.state.controls, {
+            [controlName]: updateObject(this.state.controls[controlName], {
                 value: event.target.value,
-                valid: this.checkValidity(event.target.value, this.state.controls[controlName].validation),
-                touched: true,
-            }
-        };
+                valid: checkValidity(event.target.value, this.state.controls[controlName].validation),
+                touched:true
+            })
+        });
         this.setState({ controls: updatedControls });
     }
 
@@ -158,7 +126,7 @@ class Auth extends Component {
                 </form>
                 <Button
                     btnType="Danger"
-                    clicked={this.switchAuthModeHandler}>SWITCH TO {this.state.isSignUp ? 'SIGN IN' : 'SIGN UP'}</Button>
+                    clicked={this.switchAuthModeHandler}>SWITCH TO {!this.state.isSignUp ? 'SIGN UP' : 'SIGN IN'}</Button>
                 {errorMessage}
             </div>
         );

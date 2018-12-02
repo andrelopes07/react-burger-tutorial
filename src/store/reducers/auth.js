@@ -1,5 +1,5 @@
 import { AUTH_REQUEST, AUTH_SUCCESS, AUTH_FAIL, AUTH_LOGOUT, SET_AUTH_REDIRECT_PATH } from '../constants/constants';
-import { updateObject } from '../utility';
+import { updateObject } from '../../utils/updateObject';
 
 const initialState = {
     token: null,

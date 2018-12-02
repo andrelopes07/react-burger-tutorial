@@ -1,5 +1,5 @@
 import { ADD_INGREDIENT, REMOVE_INGREDIENT, SET_INGREDIENTS, FETCH_INGREDIENTS_FAILED } from '../constants/constants';
-import { updateObject } from '../utility';
+import { updateObject } from '../../utils/updateObject';
 
 const initialState = {
     ingredients: null,
